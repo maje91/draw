@@ -6,7 +6,6 @@
 
 #include <colex.hpp>
 #include <utility>
-#include <functional>
 
 using namespace colex;
 
