@@ -18,7 +18,7 @@ set(TEST_SRC doctest.cpp doctest.hpp)
 
 find_package(Eigen3 REQUIRED)
 
-include_directories(SYSTEM /usr/local/include)
+include_directories(SYSTEM /usr/local/include colex)
 link_directories(/usr/local/lib)
 
 add_library(${LIB_NAME} SHARED ${INC} ${SRC})

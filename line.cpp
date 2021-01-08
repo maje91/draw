@@ -5,6 +5,8 @@
 #include "line.hpp"
 
 #include <colex.hpp>
+#include <utility>
+#include <functional>
 
 using namespace colex;
 
@@ -12,7 +14,7 @@ namespace draw {
 
 Line::Line(std::initializer_list<glm::vec2> points) : points(points) {}
 
-Line::Line(std::vector<glm::vec2> points) : points(points) {}
+Line::Line(std::vector<glm::vec2> points) : points(std::move(points)) {}
 
 size_t Line::segments_count() const {
   return std::max<size_t>(0, points.size() - 1);
