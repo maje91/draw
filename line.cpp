@@ -9,7 +9,9 @@
 
 using namespace colex;
 
-namespace draw {
+namespace draw::line {
+
+size_t vertex_size() { return 5; }
 
 Line::Line(std::initializer_list<glm::vec2> points) : points(points) {}
 
@@ -23,10 +25,6 @@ size_t Line::intersections_count() const {
   return std::max<size_t>(0, segments_count() - 1);
 }
 
-size_t Line::vertex_size() const {
-  return 5;
-}
-
 size_t Line::vertices_count() const {
   return 4 * segments_count();
 }
@@ -35,10 +33,8 @@ size_t Line::indices_count() const {
   return 6 * segments_count() + 6 * intersections_count();
 }
 
-render::Line Line::build() const {
-  std::vector<float> vertices(vertex_size() * vertices_count());
-  std::vector<unsigned int> indices(indices_count());
-  iter(points) | pairwise() | fold(vertices.data(), [](float *vertices, auto x) {
+void Line::fill(float *vertices, unsigned int *indices, unsigned int v0_index) const {
+  iter(points) | pairwise() | fold(vertices, [](float *vertices, auto x) {
     const glm::vec2 &a = x.first;
     const glm::vec2 &b = x.second;
 
@@ -96,8 +92,8 @@ render::Line Line::build() const {
   };
 
   auto* last_segment_indices = range<unsigned int>(0, points.size() - 2)
-          | fold(indices.data(), [&](auto* indices, auto i) {
-    unsigned int v0 = 4 * i;
+                               | fold(indices, [&](auto* indices, auto i) {
+    unsigned int v0 = v0_index + 4 * i;
 
     set_segment_indices(indices, v0);
     set_intersection_indices(indices, v0);
@@ -105,7 +101,14 @@ render::Line Line::build() const {
     return indices + 12;
   });
 
-  set_segment_indices(last_segment_indices, 4 * (points.size() - 2));
+  set_segment_indices(last_segment_indices, v0_index + 4 * (points.size() - 2));
+}
+
+render::Line Line::build() const {
+  std::vector<float> vertices(vertex_size() * vertices_count());
+  std::vector<unsigned int> indices(indices_count());
+
+  fill(vertices.data(), indices.data(), 0);
 
   return render::Line(std::move(vertices), std::move(indices));
 }
