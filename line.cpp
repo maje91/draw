@@ -24,7 +24,7 @@ size_t Line::intersections_count() const {
 }
 
 size_t Line::vertex_size() const {
-  return 4;
+  return 5;
 }
 
 size_t Line::vertices_count() const {
@@ -40,35 +40,37 @@ void Line::build(float *vertices, unsigned int *indices) const {
     const glm::vec2 &a = x.first;
     const glm::vec2 &b = x.second;
 
-    float l = glm::distance(a, b);
-
-    glm::vec2 d = (b - a) / l;
+    glm::vec2 d = b - a;
 
     // a
     vertices[0] = a.x;
     vertices[1] = a.y;
-    vertices[2] = -d.y;
-    vertices[3] = d.x;
+    vertices[2] = d.x;
+    vertices[3] = d.y;
+    vertices[4] = 1.f;
 
     // b
-    vertices[4] = a.x;
-    vertices[5] = a.y;
-    vertices[6] = d.y;
-    vertices[7] = -d.x;
+    vertices[5] = a.x;
+    vertices[6] = a.y;
+    vertices[7] = d.x;
+    vertices[8] = d.y;
+    vertices[9] = -1.f;
 
     // c
-    vertices[8] = b.x;
-    vertices[9] = b.y;
-    vertices[10] = d.y;
-    vertices[11] = -d.x;
+    vertices[10] = b.x;
+    vertices[11] = b.y;
+    vertices[12] = d.x;
+    vertices[13] = d.y;
+    vertices[14] = -1.f;
 
     // d
-    vertices[12] = b.x;
-    vertices[13] = b.y;
-    vertices[14] = -d.y;
-    vertices[15] = d.x;
+    vertices[15] = b.x;
+    vertices[16] = b.y;
+    vertices[17] = d.x;
+    vertices[18] = d.y;
+    vertices[19] = 1.f;
 
-    return vertices + 16;
+    return vertices + 20;
   });
 
   auto set_segment_indices = [](unsigned int* indices, unsigned int v0) {

@@ -1,0 +1,264 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{tikz}
+\usepackage[parfill]{parskip}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{placeins}
+\usepackage{cleveref}
+\usepackage{bm}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\p}[1]{\left(#1\right)}
+
+\begin{document}
+
+\usetikzlibrary{math}
+
+\section{Introduction}
+This document describes how we can generate and transform
+various shapes for rendering on a GPU. The output of each
+shape is a list of vertices and some parameters to tweak
+how the shape is rendered.
+
+\section{Transformations}
+There are two main ways to transform a shape. We can transform
+the underlying data that describes the shape, or we can transform
+the shape itself. All shapes discussed here are described by a set
+of 2D points. When we transform the underlying data, it is these
+points we refer to. Consider a point $\mathbf{x} \in \mathbb{R}^2$.
+Any linear transformation can be described by
+%
+\begin{align}
+  \mathbf{y} = \mathbf{A} \mathbf{x} + \mathbf{b}
+\end{align}
+%
+If we apply this to all points before rendering, we have
+transformed the underlying data. To transform the shape
+we instead apply it to the points defining the triangles
+that are rendered by the GPU. Of course, both approaches
+can be combined.
+
+\subsection{Homogenous Coordinates}
+It is often simpler to work in homogenous coordinates,
+since chaining transformations can be done by multiplying
+matrices. The point $\mathbf{x}$ is represented as
+%
+\begin{align}
+  \mathbf{x}' = \begin{bmatrix} \mathbf{x} \\ 1 \end{bmatrix}
+\end{align}
+%
+Define a matrix
+%
+\begin{align}
+  \mathbf{A}' = \begin{bmatrix}
+    \mathbf{A} & \mathbf{b} \\
+    \mathbf{0}^T & 1
+    \end{bmatrix}
+\end{align}
+%
+Then
+%
+\begin{align}
+  \mathbf{y}' = \mathbf{A}' \mathbf{x}'
+\end{align}
+%
+where $\mathbf{y}'$ is also a homogenous coordinate. Hence, transformations
+are easily chained.
+
+\section{Lines}
+\subsection{Single Line}
+Let $\mathbf{x}_1$ be one side of the line and $\mathbf{x}_2$ be the
+other.  Let $w$ be desired with of the line. \Cref{fig:single-line}
+shows an example of a single drawn line. To draw this line on the GPU
+we need to pass the points $a$, $b$, $c$, and $d$ to a vertex shader
+somehow.  It is important that both the transformation matrix
+$\mathbf{A}'$ and the line width $w$, is \emph{only} used in the GPU.
+With this constraint, the vertices need only be computed once.
+%
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \tikzmath{
+      \x1 = 0;
+      \y1 = 0;
+      \x2 = 4;
+      \y2 = 2;
+      \l = sqrt((\x2-\x1)^2 + (\y2-\y1)^2);
+      \w = 0.4;
+      \dx = \w * (\x2 - \x1) / \l;
+      \dy = \w * (\y2 - \y1) / \l;
+    }
+
+    \coordinate (a) at (\x1-\dy, \y1+\dx);
+    \coordinate (b) at (\x1+\dy, \y1-\dx);
+    \coordinate (c) at (\x2+\dy, \y2-\dx);
+    \coordinate (d) at (\x2-\dy, \y2+\dx);
+    \filldraw[black] (\x1, \y1) circle (2pt) node [anchor=east] {$\mathbf{y}_1$};
+    \filldraw[black] (\x2, \y2) circle (2pt) node [anchor=west] {$\mathbf{y}_2$};
+
+    \draw[gray,thick] (a) node [anchor=south] {a} -- 
+    (b) node [anchor=north] {b} -- 
+    (c) node [anchor=north] {c} -- 
+    (d) node [anchor=south] {d} -- (a);
+    \draw[black,thick,dashed] (\x1, \y1) -- (\x2, \y2);
+  \end{tikzpicture}
+  \caption{Single line}
+  \label{fig:single-line}
+\end{figure}
+
+First, define
+%
+\begin{align}
+  \mathbf{y}_1 &= \mathbf{A} \mathbf{x}_1 + \mathbf{b} \\
+  \mathbf{y}_2 &= \mathbf{A} \mathbf{x}_2 + \mathbf{b} \\
+\end{align}
+%
+and
+%
+\begin{align}
+  \bm{\Delta} &= \mathbf{y}_2 - \mathbf{y}_1\\
+  l &= \norm{\bm{\Delta}}
+\end{align}
+%
+Next, we define a matrix
+%
+\begin{align}
+  \mathbf{R} = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix}
+\end{align}
+% 
+In practice, applying this to a vector rotates the vector by 90 degrees
+counter-clockwise. We now have what we need to define the corners
+of the rectangle defining the line.
+%
+\begin{align}
+  \mathbf{a} &= \mathbf{y}_1 + \frac{w}{l} \mathbf{R} \bm{\Delta}\\
+  \mathbf{b} &= \mathbf{y}_1 - \frac{w}{l} \mathbf{R} \bm{\Delta}\\
+  \mathbf{c} &= \mathbf{y}_2 + \frac{w}{l} \mathbf{R} \bm{\Delta}\\
+  \mathbf{d} &= \mathbf{y}_2 - \frac{w}{l} \mathbf{R} \bm{\Delta}\\
+\end{align}
+%
+There is a problem here however. $\mathbf{A}'$ is baked in to several
+of the elements. We replace the $\mathbf{y}$s with $\mathbf{x}$s. We
+define
+%
+\begin{align}
+  \bm{\Delta}_x = \p{\mathbf{x}_2 - \mathbf{x}_1}
+\end{align}
+%
+which yields
+%
+\begin{align}
+  \bm{\Delta} &= \mathbf{A} \bm{\Delta}_x\\
+  l &= \norm{\mathbf{A} \bm{\Delta}_x}
+\end{align}
+%
+We can now rewrite the rectangles as
+%
+\begin{align}
+  \mathbf{a} &= \mathbf{A} \mathbf{x}_1 + \mathbf{b} +
+               \frac{w}{l} \mathbf{R} \mathbf{A} \bm{\Delta}_x\\
+  %
+  \mathbf{b} &= \mathbf{A} \mathbf{x}_1 + \mathbf{b} -
+               \frac{w}{l} \mathbf{R} \mathbf{A} \bm{\Delta}_x\\
+  %
+  \mathbf{c} &= \mathbf{A} \mathbf{x}_2 + \mathbf{b} +
+               \frac{w}{l} \mathbf{R} \mathbf{A} \bm{\Delta}_x\\
+  %
+  \mathbf{d} &= \mathbf{A} \mathbf{x}_2 + \mathbf{b} -
+               \frac{w}{l} \mathbf{R} \mathbf{A} \bm{\Delta}_x\\
+\end{align}
+%
+From this, we see that each vertex needs five attributes, its
+position, $\bm{\Delta}$, and its offset direction.  Let
+$\mathbf{v} \in \mathbb{R}^5$ represent a vertex. The 2D position to
+draw each point is
+%
+\begin{align}
+  \mathbf{p} &= \mathbf{A} \begin{bmatrix} v_0 \\ v_1 \end{bmatrix} + \mathbf{b} +
+  \frac{v_4 w}{l} \mathbf{R} \mathbf{A} \begin{bmatrix} v_2 \\ v_3 \end{bmatrix}\\
+  l &= \norm{\mathbf{A} \begin{bmatrix} v_2 \\ v_3 \end{bmatrix}}
+\end{align}
+%
+where
+%
+\begin{align}
+  \mathbf{a} \quad &=> \quad \mathbf{v} =
+            \begin{bmatrix} \mathbf{x}_1^T & \bm{\Delta}^T & 1 \end{bmatrix}^T\\
+  %
+  \mathbf{b} \quad &=> \quad \mathbf{v} =
+            \begin{bmatrix} \mathbf{x}_1^T & \bm{\Delta}^T & -1 \end{bmatrix}^T\\
+  %
+  \mathbf{c} \quad &=> \quad \mathbf{v} =
+            \begin{bmatrix} \mathbf{x}_2^T & \bm{\Delta}^T & 1 \end{bmatrix}^T\\
+  %
+  \mathbf{d} \quad &=> \quad \mathbf{v} =
+            \begin{bmatrix} \mathbf{x}_2^T & \bm{\Delta}^T & -1 \end{bmatrix}^T\\
+\end{align}
+%
+and $\mathbf{A}$, $\mathbf{b}$ and $w$ are passed as uniforms. This way, the
+vertices only need to be computed once.
+
+\FloatBarrier
+\subsection{Multiple Lines}
+When drawing multiple lines, we have to make sure they intersect nicely.
+An example is shown in \cref{fig:multi-line}, and there is a gap between
+the lines which must be filled in. To do this we draw an additional triangle
+between the black dot, corner d and corner e. If the angle between the 
+lines went the other way the gap would occur between the black dot, corner
+f and corner c. Hence, we draw a triangle here as well.
+%
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \tikzmath{
+      \x1 = 0;
+      \y1 = 0;
+      \x2 = 4;
+      \y2 = 2;
+      \x3 = 6;
+      \y3 = 0;
+      \w = 0.4;
+      %
+      \l1 = sqrt((\x2-\x1)^2 + (\y2-\y1)^2);
+      \dx1 = \w * (\x2 - \x1) / \l1;
+      \dy1 = \w * (\y2 - \y1) / \l1;
+      %
+      \l2 = sqrt((\x3-\x2)^2 + (\y3-\y2)^2);
+      \dx2 = \w * (\x3 - \x2) / \l2;
+      \dy2 = \w * (\y3 - \y2) / \l2;
+    }
+
+    \coordinate (a) at (\x1-\dy1, \y1+\dx1);
+    \coordinate (b) at (\x1+\dy1, \y1-\dx1);
+    \coordinate (c) at (\x2+\dy1, \y2-\dx1);
+    \coordinate (d) at (\x2-\dy1, \y2+\dx1);
+
+    \coordinate (e) at (\x2-\dy2, \y2+\dx2);
+    \coordinate (f) at (\x2+\dy2, \y2-\dx2);
+    \coordinate (g) at (\x3+\dy2, \y3-\dx2);
+    \coordinate (h) at (\x3-\dy2, \y3+\dx2);
+
+    \filldraw[black] (\x1, \y1) circle (2pt);
+    \filldraw[black] (\x2, \y2) circle (2pt);
+    \filldraw[black] (\x3, \y3) circle (2pt);
+
+    \draw[gray,thick] 
+      (a) node [anchor=east] {a} -- 
+      (b) node [anchor=north] {b} -- 
+      (c) node [anchor=west] {c} -- 
+      (d) node [anchor=south] {d} -- 
+      (a);
+    \draw[gray,thick] 
+      (e) node [anchor=south] {e} -- 
+      (f) node [anchor=east] {f} -- 
+      (g) node [anchor=north] {g} -- 
+      (h) node [anchor=west] {h} -- 
+      (e);
+  \end{tikzpicture}
+  \caption{Multiple lines}
+  \label{fig:multi-line}
+\end{figure}
+
+
+\end{document}

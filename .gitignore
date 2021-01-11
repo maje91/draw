@@ -1,4 +1,8 @@
 .idea
 colex
 cmake-build-debug
-main.pdf
+theory/main.pdf
+theory/main.aux
+theory/main.fdb_latexmk
+theory/main.fls
+theory/main.log
