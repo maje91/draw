@@ -14,7 +14,7 @@ namespace draw::line {
 size_t vertex_size();
 
 template<typename T>
-class LineBase {
+class Base {
   [[nodiscard]] size_t vertices_count() const {
     return static_cast<const T &>(*this).vertices_count();
   }
@@ -27,12 +27,12 @@ class LineBase {
     return static_cast<const T &>(*this).build();
   }
 
-  void fill(float* vertices, unsigned int* indices, unsigned int v0_index) const {
-    return static_cast<const T&>(*this).fill(vertices, indices, v0_index);
+  void fill(float* vertices, unsigned int* indices, unsigned int v0) const {
+    return static_cast<const T&>(*this).fill(vertices, indices, v0);
   }
 };
 
-class Line : public LineBase<Line> {
+class Line : public Base<Line> {
  public:
   Line(std::initializer_list<glm::vec2> points);
   explicit Line(std::vector<glm::vec2> points);
@@ -41,7 +41,7 @@ class Line : public LineBase<Line> {
   [[nodiscard]] size_t indices_count() const;
 
   [[nodiscard]] render::Line build() const;
-  void fill(float* vertices, unsigned int* indices, unsigned int v0_index) const;
+  void fill(float* vertices, unsigned int* indices, unsigned int v0) const;
 
  private:
   [[nodiscard]] size_t segments_count() const;
@@ -51,9 +51,9 @@ class Line : public LineBase<Line> {
 };
 
 template<typename L, typename R>
-class Composition : public LineBase<Composition<L, R>> {
+class Composition : public Base<Composition<L, R>> {
  public:
-  Composition(LineBase<L> &&a, LineBase<R> &&b)
+  Composition(Base<L> &&a, Base<R> &&b)
       : a(static_cast<L &&>(a)), b(static_cast<R &&>(b)) {}
 
   [[nodiscard]] size_t vertices_count() const {
@@ -64,9 +64,9 @@ class Composition : public LineBase<Composition<L, R>> {
     return a.indices_count() + b.indices_count();
   }
 
-  void fill(float* vertices, unsigned int* indices, unsigned int v0_index) const {
-    a.fill(vertices, indices, v0_index);
-    b.fill(vertices + vertex_size() * a.vertices_count(), indices + a.indices_count(), v0_index + a.vertices_count());
+  void fill(float* vertices, unsigned int* indices, unsigned int v0) const {
+    a.fill(vertices, indices, v0);
+    b.fill(vertices + vertex_size() * a.vertices_count(), indices + a.indices_count(), v0 + a.vertices_count());
   }
 
   [[nodiscard]] render::Line build() const {
@@ -74,14 +74,6 @@ class Composition : public LineBase<Composition<L, R>> {
     std::vector<unsigned int> indices(indices_count());
 
     fill(vertices.data(), indices.data(), 0);
-
-    std::cout << "Vertices count: " << vertices.size() << std::endl;
-    iter(vertices) | for_each([](auto x) { std::cout << x << std::endl; });
-
-    std::cout << std::endl;
-
-    std::cout << "Indices count: " << indices.size() << std::endl;
-    iter(indices) | for_each([](auto x) { std::cout << x << std::endl; });
 
     return render::Line(std::move(vertices), std::move(indices));
   }
@@ -92,7 +84,7 @@ class Composition : public LineBase<Composition<L, R>> {
 };
 
 template<typename L, typename R>
-Composition<L, R> operator&(LineBase<L> &&a, LineBase<R> &&b) {
+Composition<L, R> operator&(Base<L> &&a, Base<R> &&b) {
   return Composition<L, R>(std::move(a), std::move(b));
 }
 }  // namespace draw

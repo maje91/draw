@@ -33,7 +33,7 @@ size_t Line::indices_count() const {
   return 6 * segments_count() + 6 * intersections_count();
 }
 
-void Line::fill(float *vertices, unsigned int *indices, unsigned int v0_index) const {
+void Line::fill(float *vertices, unsigned int *indices, unsigned int v0) const {
   iter(points) | pairwise() | fold(vertices, [](float *vertices, auto x) {
     const glm::vec2 &a = x.first;
     const glm::vec2 &b = x.second;
@@ -93,15 +93,13 @@ void Line::fill(float *vertices, unsigned int *indices, unsigned int v0_index) c
 
   auto* last_segment_indices = range<unsigned int>(0, points.size() - 2)
                                | fold(indices, [&](auto* indices, auto i) {
-    unsigned int v0 = v0_index + 4 * i;
-
-    set_segment_indices(indices, v0);
-    set_intersection_indices(indices, v0);
+    set_segment_indices(indices, v0 + 4 * i);
+    set_intersection_indices(indices, v0 + 4 * i);
 
     return indices + 12;
   });
 
-  set_segment_indices(last_segment_indices, v0_index + 4 * (points.size() - 2));
+  set_segment_indices(last_segment_indices, v0 + 4 * (points.size() - 2));
 }
 
 render::Line Line::build() const {
