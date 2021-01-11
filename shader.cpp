@@ -3,8 +3,8 @@
 #include <glad/glad.h>
 
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
 static std::string read_file(const std::string &path) {
   std::ifstream file;
@@ -75,4 +75,4 @@ unsigned int link(unsigned int vertex_shader, unsigned int fragment_shader) {
   return program;
 }
 
-}
+}  // namespace draw::shader

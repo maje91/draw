@@ -2,19 +2,20 @@
 
 #include "transformation.hpp"
 
+#include <glm/glm.hpp>
 #include <utility>
 #include <vector>
-#include <glm/glm.hpp>
 
 namespace draw::render {
 
 class Line {
  public:
-  Line(std::vector<float> vertices, std::vector<unsigned int> indices, float width);
+  Line(std::vector<float> vertices, std::vector<unsigned int> indices,
+    float width);
 
   void draw();
 
-  transform::Transformation&transform();
+  transform::Transformation &transform();
   void set_A(glm::mat2 A);
   void set_b(glm::vec2 b);
   void set_width(float width);
@@ -35,4 +36,4 @@ class Line {
   unsigned int b_location;
 };
 
-}  // namespace render
+}  // namespace draw::render

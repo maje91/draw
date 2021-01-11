@@ -12,8 +12,8 @@ class Transformation {
   Transformation &translate_y(float y);
 
   Transformation &scale(float x, float y);
-  Transformation& scale_x(float x);
-  Transformation& scale_y(float y);
+  Transformation &scale_x(float x);
+  Transformation &scale_y(float y);
 
   Transformation &rotate(float theta);
 

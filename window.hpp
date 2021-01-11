@@ -18,4 +18,4 @@ bool advance();
 unsigned int height();
 unsigned int width();
 
-}
+}  // namespace draw::window
