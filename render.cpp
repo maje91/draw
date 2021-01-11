@@ -10,7 +10,7 @@
 
 namespace draw::render {
 
-Shape::Shape(std::vector<float> vertices, std::vector<unsigned int> indices) : m_vertices(std::move(vertices)), m_indices(std::move(indices)) {
+Line::Line(std::vector<float> vertices, std::vector<unsigned int> indices) : m_vertices(std::move(vertices)), m_indices(std::move(indices)) {
   auto vertex_shader = shader::compile_vertex("../vertex.glsl");
   auto fragment_shader = shader::compile_fragment("../fragment.glsl");
   m_program = shader::link(vertex_shader, fragment_shader);
@@ -49,10 +49,10 @@ Shape::Shape(std::vector<float> vertices, std::vector<unsigned int> indices) : m
   b_location = glGetUniformLocation(m_program, "b");
 }
 
-void Shape::draw() {
+void Line::draw() {
   glUseProgram(m_program);
   glUniform1f(width_location, 0.005f);
-  glUniformMatrix2fv(A_location, 1, GL_FALSE, glm::value_ptr(glm::mat2(2.0, 0.0, 0.0, 1.0)));
+  glUniformMatrix2fv(A_location, 1, GL_FALSE, glm::value_ptr(glm::mat2(1.0, 0.0, 0.0, 1.0)));
   glUniform2fv(b_location, 1, glm::value_ptr(glm::vec2(0.0, 0.0)));
   glBindVertexArray(m_vao);
   glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr);

@@ -5,9 +5,9 @@
 
 namespace draw::render {
 
-class Shape {
+class Line {
  public:
-  Shape(std::vector<float> vertices, std::vector<unsigned int> indices);
+  Line(std::vector<float> vertices, std::vector<unsigned int> indices);
 
   void draw();
 

@@ -35,8 +35,10 @@ size_t Line::indices_count() const {
   return 6 * segments_count() + 6 * intersections_count();
 }
 
-void Line::build(float *vertices, unsigned int *indices) const {
-  iter(points) | pairwise() | fold(vertices, [](float *vertices, auto x) {
+render::Line Line::build() const {
+  std::vector<float> vertices(vertex_size() * vertices_count());
+  std::vector<unsigned int> indices(indices_count());
+  iter(points) | pairwise() | fold(vertices.data(), [](float *vertices, auto x) {
     const glm::vec2 &a = x.first;
     const glm::vec2 &b = x.second;
 
@@ -94,7 +96,7 @@ void Line::build(float *vertices, unsigned int *indices) const {
   };
 
   auto* last_segment_indices = range<unsigned int>(0, points.size() - 2)
-          | fold(indices, [&](auto* indices, auto i) {
+          | fold(indices.data(), [&](auto* indices, auto i) {
     unsigned int v0 = 4 * i;
 
     set_segment_indices(indices, v0);
@@ -104,6 +106,8 @@ void Line::build(float *vertices, unsigned int *indices) const {
   });
 
   set_segment_indices(last_segment_indices, 4 * (points.size() - 2));
+
+  return render::Line(std::move(vertices), std::move(indices));
 }
 
 }  // namespace draw
