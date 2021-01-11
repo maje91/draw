@@ -36,6 +36,7 @@ class Line : public Base<Line> {
  public:
   Line(std::initializer_list<glm::vec2> points);
   explicit Line(std::vector<glm::vec2> points);
+  Line(float x1, float y1, float x2, float y2);
 
   [[nodiscard]] size_t vertices_count() const;
   [[nodiscard]] size_t indices_count() const;

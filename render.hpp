@@ -1,5 +1,7 @@
 #pragma once
 
+#include "transformation.hpp"
+
 #include <utility>
 #include <vector>
 #include <glm/glm.hpp>
@@ -12,6 +14,7 @@ class Line {
 
   void draw();
 
+  transform::Transformation&transform();
   void set_A(glm::mat2 A);
   void set_b(glm::vec2 b);
   void set_width(float width);
@@ -26,8 +29,7 @@ class Line {
   unsigned int m_program;
 
   float m_width;
-  glm::mat2 m_A;
-  glm::vec2 m_b;
+  transform::Transformation m_transformation;
   unsigned int width_location;
   unsigned int A_location;
   unsigned int b_location;

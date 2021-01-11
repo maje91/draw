@@ -11,7 +11,7 @@
 namespace draw::render {
 
 Line::Line(std::vector<float> vertices, std::vector<unsigned int> indices, float width)
-    : m_vertices(std::move(vertices)), m_indices(std::move(indices)), m_A(glm::mat2(1.f)), m_b(glm::vec2(0.f, 0.f)), m_width(width) {
+    : m_vertices(std::move(vertices)), m_indices(std::move(indices)), m_width(width) {
   auto vertex_shader = shader::compile_vertex("../vertex.glsl");
   auto fragment_shader = shader::compile_fragment("../fragment.glsl");
   m_program = shader::link(vertex_shader, fragment_shader);
@@ -50,12 +50,8 @@ Line::Line(std::vector<float> vertices, std::vector<unsigned int> indices, float
   b_location = glGetUniformLocation(m_program, "b");
 }
 
-void Line::set_A(glm::mat2 A) {
-  m_A = A;
-}
-
-void Line::set_b(glm::vec2 b) {
-  m_b = b;
+transform::Transformation& Line::transform() {
+  return m_transformation;
 }
 
 void Line::set_width(float width) {
@@ -65,8 +61,8 @@ void Line::set_width(float width) {
 void Line::draw() {
   glUseProgram(m_program);
   glUniform1f(width_location, m_width);
-  glUniformMatrix2fv(A_location, 1, GL_FALSE, glm::value_ptr(m_A));
-  glUniform2fv(b_location, 1, glm::value_ptr(m_b));
+  glUniformMatrix2fv(A_location, 1, GL_FALSE, glm::value_ptr(m_transformation.get_A()));
+  glUniform2fv(b_location, 1, glm::value_ptr(m_transformation.get_b()));
   glBindVertexArray(m_vao);
   glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr);
 }

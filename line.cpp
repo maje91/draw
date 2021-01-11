@@ -17,6 +17,8 @@ Line::Line(std::initializer_list<glm::vec2> points) : points(points) {}
 
 Line::Line(std::vector<glm::vec2> points) : points(std::move(points)) {}
 
+Line::Line(float x1, float y1, float x2, float y2) : points({{x1, y1}, {x2, y2}}) {}
+
 size_t Line::segments_count() const {
   return std::max<size_t>(0, points.size() - 1);
 }
