@@ -102,13 +102,13 @@ void Line::fill(float *vertices, unsigned int *indices, unsigned int v0) const {
   set_segment_indices(last_segment_indices, v0 + 4 * (points.size() - 2));
 }
 
-render::Line Line::build() const {
+render::Line Line::build(float width) const {
   std::vector<float> vertices(vertex_size() * vertices_count());
   std::vector<unsigned int> indices(indices_count());
 
   fill(vertices.data(), indices.data(), 0);
 
-  return render::Line(std::move(vertices), std::move(indices));
+  return render::Line(std::move(vertices), std::move(indices), width);
 }
 
 }  // namespace draw

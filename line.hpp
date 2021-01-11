@@ -23,8 +23,8 @@ class Base {
     return static_cast<const T &>(*this).indices_count();
   }
 
-  [[nodiscard]] render::Line build() const {
-    return static_cast<const T &>(*this).build();
+  [[nodiscard]] render::Line build(float width) const {
+    return static_cast<const T &>(*this).build(width);
   }
 
   void fill(float* vertices, unsigned int* indices, unsigned int v0) const {
@@ -40,7 +40,7 @@ class Line : public Base<Line> {
   [[nodiscard]] size_t vertices_count() const;
   [[nodiscard]] size_t indices_count() const;
 
-  [[nodiscard]] render::Line build() const;
+  [[nodiscard]] render::Line build(float width) const;
   void fill(float* vertices, unsigned int* indices, unsigned int v0) const;
 
  private:
@@ -69,13 +69,13 @@ class Composition : public Base<Composition<L, R>> {
     b.fill(vertices + vertex_size() * a.vertices_count(), indices + a.indices_count(), v0 + a.vertices_count());
   }
 
-  [[nodiscard]] render::Line build() const {
+  [[nodiscard]] render::Line build(float width) const {
     std::vector<float> vertices(vertex_size() * vertices_count());
     std::vector<unsigned int> indices(indices_count());
 
     fill(vertices.data(), indices.data(), 0);
 
-    return render::Line(std::move(vertices), std::move(indices));
+    return render::Line(std::move(vertices), std::move(indices), width);
   }
 
  private:
