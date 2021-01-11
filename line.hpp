@@ -2,7 +2,7 @@
 
 #include "render.hpp"
 
-#include <colex.hpp>
+#include <colex/colex.hpp>
 #include <glm/glm.hpp>
 #include <iostream>
 #include <vector>
@@ -24,7 +24,7 @@ class Base {
   }
 
   [[nodiscard]] render::Line build(float width) const {
-    return static_cast<const T &>(*this).build(width)
+    return static_cast<const T &>(*this).build(width);
   }
 
   void fill(float *vertices, unsigned int *indices, unsigned int v0) const {

@@ -4,7 +4,6 @@
 
 #include "line.hpp"
 
-#include <colex.hpp>
 #include <utility>
 
 using namespace colex;
