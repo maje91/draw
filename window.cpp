@@ -7,7 +7,8 @@
 
 namespace draw::window {
 
-static std::optional<std::function<void(input::mouse::Event event)>> m_handle_mouse_event;
+static std::optional<std::function<void(const input::Mouse &mouse, input::mouse::Event event)>> m_handle_mouse_event;
+static input::Mouse m_mouse;
 static GLFWwindow *m_window;
 static unsigned int m_width;
 static unsigned int m_height;
@@ -26,7 +27,9 @@ static void mouse_callback(GLFWwindow *window, double x, double y) {
   (void) window;
 
   if (m_handle_mouse_event.has_value()) {
-    m_handle_mouse_event.value()(input::mouse::Move{.x = x, .y = y});
+    m_handle_mouse_event.value()(m_mouse, input::mouse::Move{.x = x, .y = y});
+    m_mouse.x = x;
+    m_mouse.y = y;
   }
 }
 
@@ -36,7 +39,8 @@ static void scroll_callback(
   (void) x_offset;
 
   if (m_handle_mouse_event.has_value()) {
-    m_handle_mouse_event.value()(input::mouse::Scroll{.offset = y_offset});
+    m_handle_mouse_event.value()(
+      m_mouse, input::mouse::Scroll{.offset = y_offset});
   }
 }
 
@@ -50,12 +54,15 @@ static void mouse_button_callback(
   if (m_handle_mouse_event.has_value()) {
     switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT: {
-      m_handle_mouse_event.value()(input::mouse::Left{.action = button_action});
+      m_handle_mouse_event.value()(
+        m_mouse, input::mouse::Left{.action = button_action});
+      m_mouse.left = input::Button(input::ButtonState::Pressed);
       break;
     }
 
     case GLFW_MOUSE_BUTTON_RIGHT: {
-      m_handle_mouse_event.value()(input::mouse::Right{.action = button_action});
+      m_handle_mouse_event.value()(m_mouse, input::mouse::Right{.action = button_action});
+      m_mouse.right = input::Button(input::ButtonState::Released);
       break;
     }
 
@@ -101,7 +108,7 @@ void init(const Spec &spec) {
   }
 }
 
-void set_event_handler(const std::function<void(input::mouse::Event)> &on_mouse_event) {
+void set_event_handler(const std::function<void(const input::Mouse &, input::mouse::Event)> &on_mouse_event) {
   m_handle_mouse_event = on_mouse_event;
 }
 

@@ -15,7 +15,7 @@ struct Spec {
 
 void init(const Spec &spec);
 void destroy();
-void set_event_handler(const std::function<void(input::mouse::Event)> &on_mouse_event);
+void set_event_handler(const std::function<void(const input::Mouse &mouse, input::mouse::Event event)> &on_mouse_event);
 
 bool advance();
 
