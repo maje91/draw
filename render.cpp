@@ -1,6 +1,8 @@
 #include "render.hpp"
 
 #include "shader.hpp"
+#include "vertex.glsl.h"
+#include "fragment.glsl.h"
 
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,8 +18,8 @@ Line::Line(
     , m_indices(std::move(indices))
     , m_width(width) {
 
-  auto vertex_shader = shader::compile_vertex("../vertex.glsl");
-  auto fragment_shader = shader::compile_fragment("../fragment.glsl");
+  auto vertex_shader = shader::compile_vertex(VERTEX_GLSL);
+  auto fragment_shader = shader::compile_fragment(FRAGMENT_GLSL);
   m_program = shader::link(vertex_shader, fragment_shader);
 
   glDeleteShader(vertex_shader);

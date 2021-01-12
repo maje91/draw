@@ -11,7 +11,7 @@ set(LIB_NAME ${PROJECT_NAME})
 set(TESTS_NAME ${PROJECT_NAME}_tests)
 set(MAIN_NAME ${PROJECT_NAME}_main)
 
-set(INC line.hpp window.hpp shader.hpp render.hpp transformation.hpp)
+set(INC line.hpp window.hpp shader.hpp render.hpp transformation.hpp vertex.glsl.h fragment.glsl.h)
 set(SRC line.cpp window.cpp shader.cpp render.cpp transformation.cpp)
 set(TEST_SRC doctest.cpp doctest.hpp)
 set(MAIN_SRC main.cpp)
@@ -19,8 +19,7 @@ set(GLAD_SRC glad/src/glad.c)
 
 find_package(Eigen3 REQUIRED)
 
-include_directories(SYSTEM /usr/local/include glad/include)
-link_directories(/usr/local/lib)
+include_directories(SYSTEM glad/include)
 
 add_library(${LIB_NAME} SHARED ${INC} ${SRC} ${GLAD_SRC})
 target_link_libraries(${LIB_NAME} Eigen3::Eigen colex glfw GL X11 pthread Xrandr Xi dl)
