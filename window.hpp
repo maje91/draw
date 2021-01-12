@@ -1,6 +1,9 @@
 #pragma once
 
+#include "input.hpp"
+
 #include <string>
+#include <functional>
 
 namespace draw::window {
 
@@ -12,6 +15,7 @@ struct Spec {
 
 void init(const Spec &spec);
 void destroy();
+void set_event_handler(const std::function<void(input::mouse::Event)> &on_mouse_event);
 
 bool advance();
 

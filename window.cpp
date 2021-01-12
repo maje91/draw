@@ -1,14 +1,78 @@
 #include "window.hpp"
 
 #include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
 namespace draw::window {
 
+static std::optional<std::function<void(input::mouse::Event event)>> m_handle_mouse_event;
 static GLFWwindow *m_window;
 static unsigned int m_width;
 static unsigned int m_height;
+
+static input::ButtonAction button_action_from_glfw(int action) {
+  switch (action) {
+  case GLFW_PRESS: return input::ButtonAction::Press;
+  case GLFW_RELEASE: return input::ButtonAction::Release;
+  default:
+    throw std::runtime_error(
+      "button_action_from_glfw: Invalid GLFW action code");
+  }
+}
+
+static void mouse_callback(GLFWwindow *window, double x, double y) {
+  (void) window;
+
+  if (m_handle_mouse_event.has_value()) {
+    m_handle_mouse_event.value()(input::mouse::Move{.x = x, .y = y});
+  }
+}
+
+static void scroll_callback(
+  GLFWwindow *window, double x_offset, double y_offset) {
+  (void) window;
+  (void) x_offset;
+
+  if (m_handle_mouse_event.has_value()) {
+    m_handle_mouse_event.value()(input::mouse::Scroll{.offset = y_offset});
+  }
+}
+
+static void mouse_button_callback(
+  GLFWwindow *window, int button, int action, int mods) {
+  (void) window;
+  (void) mods;
+
+  input::ButtonAction button_action = button_action_from_glfw(action);
+
+  if (m_handle_mouse_event.has_value()) {
+    switch (button) {
+    case GLFW_MOUSE_BUTTON_LEFT: {
+      m_handle_mouse_event.value()(input::mouse::Left{.action = button_action});
+      break;
+    }
+
+    case GLFW_MOUSE_BUTTON_RIGHT: {
+      m_handle_mouse_event.value()(input::mouse::Right{.action = button_action});
+      break;
+    }
+
+    default:
+      throw std::runtime_error("mouse_button_callback: Invalid GLFW button code");
+    }
+  }
+}
+
+static void framebuffer_size_callback(
+  GLFWwindow *window, int width, int height) {
+  (void) window;
+
+  m_width = width;
+  m_height = height;
+  glViewport(0, 0, width, height);
+}
 
 void init(const Spec &spec) {
   glfwInit();
@@ -27,10 +91,18 @@ void init(const Spec &spec) {
   }
 
   glfwMakeContextCurrent(m_window);
+  glfwSetCursorPosCallback(m_window, mouse_callback);
+  glfwSetScrollCallback(m_window, scroll_callback);
+  glfwSetMouseButtonCallback(m_window, mouse_button_callback);
+  glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
 
   if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
     throw std::runtime_error("Failed to initialize GLAD");
   }
+}
+
+void set_event_handler(const std::function<void(input::mouse::Event)> &on_mouse_event) {
+  m_handle_mouse_event = on_mouse_event;
 }
 
 bool advance() {
