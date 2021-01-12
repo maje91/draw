@@ -27,6 +27,9 @@ Transformation &Transformation::scale(float x, float y) {
   A_prime[0][1] *= y;
   A_prime[1][1] *= y;
 
+  A_prime[0][2] *= x;
+  A_prime[1][2] *= y;
+
   return *this;
 }
 

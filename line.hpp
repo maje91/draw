@@ -38,6 +38,10 @@ class Line : public Base<Line> {
   explicit Line(std::vector<glm::vec2> points);
   Line(float x1, float y1, float x2, float y2);
 
+  template<typename I>
+  explicit Line(iterator::Iterator<I> &&points)
+      : points(std::move(points) | collect<std::vector>()) {}
+
   [[nodiscard]] size_t vertices_count() const;
   [[nodiscard]] size_t indices_count() const;
 
