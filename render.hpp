@@ -14,6 +14,7 @@ class Line {
     float width);
 
   void draw();
+  void draw(unsigned int start_index, unsigned int segment_count);
 
   transform::Transformation &transform();
   void set_A(glm::mat2 A);

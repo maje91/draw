@@ -1,8 +1,8 @@
 #include "render.hpp"
 
+#include "fragment.glsl.h"
 #include "shader.hpp"
 #include "vertex.glsl.h"
-#include "fragment.glsl.h"
 
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -64,14 +64,26 @@ transform::Transformation &Line::transform() { return m_transformation; }
 
 void Line::set_width(float width) { m_width = width; }
 
-void Line::draw() {
+void Line::draw(unsigned int start_index, unsigned int segment_count) {
   glUseProgram(m_program);
+
   glUniform1f(width_location, m_width);
   glUniformMatrix2fv(
     A_location, 1, GL_FALSE, glm::value_ptr(m_transformation.get_A_glm()));
   glUniform2fv(b_location, 1, glm::value_ptr(m_transformation.get_b_glm()));
+
   glBindVertexArray(m_vao);
-  glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr);
+
+  unsigned int i1 = 12 * start_index;
+  unsigned int i2 = std::min<unsigned int>(12 * (start_index + segment_count), m_indices.size() - 12 * segment_count);
+  unsigned int size = i2 - i1;
+
+  if (size > 0) {
+    glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT,
+      (void *) (sizeof(unsigned int) * i1));
+  }
 }
+
+void Line::draw() { draw(0, 0); }
 
 }  // namespace draw::render
