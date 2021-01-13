@@ -68,8 +68,8 @@ void Line::draw() {
   glUseProgram(m_program);
   glUniform1f(width_location, m_width);
   glUniformMatrix2fv(
-    A_location, 1, GL_FALSE, glm::value_ptr(m_transformation.get_A()));
-  glUniform2fv(b_location, 1, glm::value_ptr(m_transformation.get_b()));
+    A_location, 1, GL_FALSE, glm::value_ptr(m_transformation.get_A_glm()));
+  glUniform2fv(b_location, 1, glm::value_ptr(m_transformation.get_b_glm()));
   glBindVertexArray(m_vao);
   glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, nullptr);
 }

@@ -7,7 +7,9 @@
 
 namespace draw::window {
 
-static std::optional<std::function<void(const input::Mouse &mouse, input::mouse::Event event)>> m_handle_mouse_event;
+static std::optional<
+  std::function<void(const input::Mouse &mouse, input::mouse::Event event)>>
+  m_handle_mouse_event;
 static input::Mouse m_mouse;
 static GLFWwindow *m_window;
 static unsigned int m_width;
@@ -50,24 +52,29 @@ static void mouse_button_callback(
   (void) mods;
 
   input::ButtonAction button_action = button_action_from_glfw(action);
+  input::ButtonState button_state = button_action == input::ButtonAction::Press
+                                    ? input::ButtonState::Pressed
+                                    : input::ButtonState::Released;
 
   if (m_handle_mouse_event.has_value()) {
     switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT: {
       m_handle_mouse_event.value()(
         m_mouse, input::mouse::Left{.action = button_action});
-      m_mouse.left = input::Button(input::ButtonState::Pressed);
+      m_mouse.left = input::Button(button_state);
       break;
     }
 
     case GLFW_MOUSE_BUTTON_RIGHT: {
-      m_handle_mouse_event.value()(m_mouse, input::mouse::Right{.action = button_action});
-      m_mouse.right = input::Button(input::ButtonState::Released);
+      m_handle_mouse_event.value()(
+        m_mouse, input::mouse::Right{.action = button_action});
+      m_mouse.right = input::Button(button_state);
       break;
     }
 
     default:
-      throw std::runtime_error("mouse_button_callback: Invalid GLFW button code");
+      throw std::runtime_error(
+        "mouse_button_callback: Invalid GLFW button code");
     }
   }
 }
@@ -108,7 +115,9 @@ void init(const Spec &spec) {
   }
 }
 
-void set_event_handler(const std::function<void(const input::Mouse &, input::mouse::Event)> &on_mouse_event) {
+void set_event_handler(
+  const std::function<void(const input::Mouse &, input::mouse::Event)>
+    &on_mouse_event) {
   m_handle_mouse_event = on_mouse_event;
 }
 

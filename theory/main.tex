@@ -63,9 +63,71 @@ Then
   \mathbf{y}' = \mathbf{A}' \mathbf{x}'
 \end{align}
 %
-where $\mathbf{y}'$ is also a homogenous coordinate. Hence, transformations
-are easily chained.
+where $\mathbf{y}'$ is also a homogenous coordinate. Hence,
+transformations are easily chained. We can also reverse the
+transformation by inverting $\mathbf{A}'$.
 
+\subsection{Decomposition}
+If we restrict ourselves to the transformations scaling, rotation and translation,
+then any transformation can be decomposed as
+%
+\begin{align}
+  \mathbf{y} = \mathbf{R} \mathbf{S} \mathbf{x} + \mathbf{b}
+\end{align}
+%
+where
+%
+\begin{align}
+  \mathbf{R} = \begin{bmatrix}
+    \cos(\theta) & -\sin(\theta) \\
+    \sin(\theta) & \cos(\theta)
+  \end{bmatrix}\quad,\quad
+  % 
+  \mathbf{S} = \begin{bmatrix}
+    s_x & 0 \\ 0 & s_y                 
+  \end{bmatrix}
+\end{align}
+%
+where $\theta$ is rotation, $s_x$ and $s_y$ is $x$ and $y$ scaling,
+and $\mathbf{b}$ is translation. We thus have
+%
+\begin{align}
+  \mathbf{A} = \mathbf{RS} = \begin{bmatrix}
+    s_x \cos(\theta) & -s_y \sin(\theta) \\
+    s_x \sin(\theta) & s_y \cos(\theta)
+  \end{bmatrix}
+\end{align}
+%
+which yields $4$ equations with $3$ unknowns. We begin solving for $\theta$.
+%
+\begin{align}
+  \frac{s_x \sin(\theta)}{s_x \cos(\theta)} = \frac{A_{00}}{A_{10}}
+\end{align}
+%
+which leads to
+%
+\begin{align}
+  \theta = \tan^{-1}\p{\frac{A_{00}}{A_{10}}}
+\end{align}
+% 
+$A_{10}$ might be problematic. Hence, we also consider the solution
+%
+\begin{align}
+  \theta = \tan^{-1}\p{\frac{A_{01}}{A_{11}}}
+\end{align}
+%
+With the transformations considered, $A_{10}$ and $A_{11}$ will never
+be zero simultaneously.  From here it's easy to see that
+%
+\begin{align}
+  s_x &= \frac{A_{00}}{\cos(\theta)}\\
+  s_y &= \frac{A_{11}}{\cos(\theta)}
+\end{align}
+%
+Thus, the decomposed quantities can easily be extracted from any
+homogenous transformation matrix $\mathbf{A}'$.
+
+\FloatBarrier
 \section{Lines}
 \subsection{Single Line}
 Let $\mathbf{x}_1$ be one side of the line and $\mathbf{x}_2$ be the
