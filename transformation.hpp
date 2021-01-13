@@ -6,7 +6,7 @@
 namespace draw::transform {
 
 struct Decomposed {
-  float theta;
+  double theta;
   Eigen::Vector2f scaling;
   Eigen::Vector2f translation;
 };
@@ -14,24 +14,24 @@ struct Decomposed {
 class Transformation {
  public:
   Transformation();
-  static Transformation scaling(float x, float y);
-  static Transformation translation(float x, float y);
-  static Transformation rotation(float theta);
+  static Transformation scaling(double x, double y);
+  static Transformation translation(double x, double y);
+  static Transformation rotation(double theta);
 
-  Transformation &translate(float x, float y);
-  Transformation &translate_x(float x);
-  Transformation &translate_y(float y);
+  Transformation &translate(double x, double y);
+  Transformation &translate_x(double x);
+  Transformation &translate_y(double y);
 
-  Transformation &scale(float x, float y);
-  Transformation &scale_x(float x);
-  Transformation &scale_y(float y);
+  Transformation &scale(double x, double y);
+  Transformation &scale_x(double x);
+  Transformation &scale_y(double y);
 
-  Transformation &rotate(float theta);
+  Transformation &rotate(double theta);
 
   [[nodiscard]] Decomposed decompose() const;
 
-  [[nodiscard]] const Eigen::Matrix3f &get() const;
-  [[nodiscard]] Eigen::Matrix3f get_inverse() const;
+  [[nodiscard]] const Eigen::Matrix3d &get() const;
+  [[nodiscard]] Eigen::Matrix3d get_inverse() const;
 
   [[nodiscard]] glm::mat2 get_A_glm() const;
   [[nodiscard]] glm::vec2 get_b_glm() const;
@@ -39,8 +39,8 @@ class Transformation {
   friend Transformation operator*(const Transformation &lhs, const Transformation &rhs);
 
  private:
-  Transformation(Eigen::Matrix3f A_prime);
-  Eigen::Matrix3f A_prime;
+  explicit Transformation(Eigen::Matrix3d A_prime);
+  Eigen::Matrix3d A_prime;
 };
 
 }  // namespace draw::transform
