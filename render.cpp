@@ -75,7 +75,7 @@ void Line::draw(unsigned int start_index, unsigned int segment_count) {
   glBindVertexArray(m_vao);
 
   unsigned int i1 = 12 * start_index;
-  unsigned int i2 = std::min<unsigned int>(12 * (start_index + segment_count), m_indices.size() - 12 * segment_count);
+  unsigned int i2 = std::min<unsigned int>(12 * (start_index + segment_count), m_indices.size());
   unsigned int size = i2 - i1;
 
   if (size > 0) {
