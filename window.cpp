@@ -15,13 +15,13 @@ static GLFWwindow *m_window;
 static unsigned int m_width;
 static unsigned int m_height;
 
-static input::ButtonAction button_action_from_glfw(int action) {
+static input::ButtonEvent button_action_from_glfw(int action) {
   switch (action) {
-  case GLFW_PRESS: return input::ButtonAction::Press;
-  case GLFW_RELEASE: return input::ButtonAction::Release;
+  case GLFW_PRESS: return input::ButtonEvent::Press;
+  case GLFW_RELEASE: return input::ButtonEvent::Release;
   default:
     throw std::runtime_error(
-      "button_action_from_glfw: Invalid GLFW action code");
+      "button_action_from_glfw: Invalid GLFW event code");
   }
 }
 
@@ -51,8 +51,8 @@ static void mouse_button_callback(
   (void) window;
   (void) mods;
 
-  input::ButtonAction button_action = button_action_from_glfw(action);
-  input::ButtonState button_state = button_action == input::ButtonAction::Press
+  input::ButtonEvent button_action = button_action_from_glfw(action);
+  input::ButtonState button_state = button_action == input::ButtonEvent::Press
                                     ? input::ButtonState::Pressed
                                     : input::ButtonState::Released;
 
@@ -60,14 +60,14 @@ static void mouse_button_callback(
     switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT: {
       m_handle_mouse_event.value()(
-        m_mouse, input::mouse::Left{.action = button_action});
+        m_mouse, input::mouse::Left{.event = button_action});
       m_mouse.left = input::Button(button_state);
       break;
     }
 
     case GLFW_MOUSE_BUTTON_RIGHT: {
       m_handle_mouse_event.value()(
-        m_mouse, input::mouse::Right{.action = button_action});
+        m_mouse, input::mouse::Right{.event = button_action});
       m_mouse.right = input::Button(button_state);
       break;
     }

@@ -93,7 +93,7 @@ void Line::fill(float *vertices, unsigned int *indices, unsigned int v0) const {
     indices[11] = v0 + 2;  // c
   };
 
-  auto *last_segment_indices = range<unsigned int>(0, points.size() - 2)
+  auto *last_segment_indices = range<unsigned int>(0, points.size() - 2, 1)
                              | fold(indices, [&](auto *indices, auto i) {
                                  set_segment_indices(indices, v0 + 4 * i);
                                  set_intersection_indices(indices, v0 + 4 * i);

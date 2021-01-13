@@ -62,8 +62,6 @@ Line::Line(
 
 transform::Transformation &Line::transform() { return m_transformation; }
 
-void Line::set_width(float width) { m_width = width; }
-
 void Line::draw(unsigned int start_index, unsigned int segment_count) {
   glUseProgram(m_program);
 
@@ -84,6 +82,6 @@ void Line::draw(unsigned int start_index, unsigned int segment_count) {
   }
 }
 
-void Line::draw() { draw(0, 0); }
+void Line::draw() { draw(0, m_indices.size() / 12); }
 
 }  // namespace draw::render

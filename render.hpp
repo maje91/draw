@@ -8,18 +8,32 @@
 
 namespace draw::render {
 
+/**
+ * A line that is ready to be drawn by the GPU
+ */
 class Line {
  public:
+  /**
+   * Constructs a line from `vertices` and `indices` with a given `width`.
+   */
   Line(std::vector<float> vertices, std::vector<unsigned int> indices,
     float width);
 
+  /**
+   * Draws the entire line
+   */
   void draw();
+
+  /**
+   * Draws a subset of the line. Draws `segment_count` segments starting from `start_index`
+   */
   void draw(unsigned int start_index, unsigned int segment_count);
 
+  /**
+   * Returns a reference to the line's current transformation
+   * @return
+   */
   transform::Transformation &transform();
-  void set_A(glm::mat2 A);
-  void set_b(glm::vec2 b);
-  void set_width(float width);
 
  private:
   std::vector<float> m_vertices;
