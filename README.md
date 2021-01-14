@@ -5,7 +5,11 @@ more primitives as I need them for other projects.
 
 ## Usage
 All the stuff you need is found in the `draw` namespace. It is assumed to be
-`using`-ed for all code in this document.
+`using`-ed for all code in this document. To include the library, a single
+header is provided
+```cpp
+#include <draw/draw.hpp>
+```
 The first step to draw something is to initialize the window. This opens a
 window on the screen and initializes OpenGL.
 ```cpp
