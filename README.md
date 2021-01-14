@@ -45,7 +45,7 @@ while (window::advance()) {  // Advances to the next frame. This clears the scre
     shape.draw();
 }
 ```
-This should draw a something like this `//\\` at the center of the windo. Finally, we
+This should draw a something like this `//\` at the center of the window. Finally, we
 have to clean up when the window should close
 ```cpp
 window::destroy();
